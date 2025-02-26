@@ -55,4 +55,27 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.patch('/:id', async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    try {
+        const match = await DataUser.findByPk(id);
+        if (!match) {
+            return res.status(404).json({ message: 'Match not found' });
+        }
+
+        Object.keys(updates).forEach(key => {
+            match[key] = updates[key];
+        });
+
+        await match.save();
+
+        res.status(200).json({ message: 'Match data updated successfully', match });
+    } catch (error) {
+        console.error('Error updating match data:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 module.exports = router;

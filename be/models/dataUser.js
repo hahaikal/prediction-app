@@ -66,11 +66,17 @@ const DataUser = sequelize.define('DataUser', {
         type: DataTypes.INTEGER
     },
     winnerByOdd: {
-        type: DataTypes.STRING
+        type: DataTypes.ENUM('Home', 'Away', 'Draw')
     },
     note: {
         type: DataTypes.TEXT,
         allowNull: false
+    },
+    scoreHome: {
+        type: DataTypes.STRING
+    },
+    scoreAway: {
+        type: DataTypes.STRING
     }
 }, {
     tableName: 'data_users',
