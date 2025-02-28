@@ -33,11 +33,11 @@ const DataUser = sequelize.define('DataUser', {
         allowNull: false
     },
     handicapHome:{
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     handicapAway:{
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     oddHome1: {

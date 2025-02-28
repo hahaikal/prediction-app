@@ -1,5 +1,5 @@
 "use client";
-import DataTable from '@/app/home/dataTable'; 
+import DataTable from '@/components/home/dataTable'; 
 
 export default function Home() {
   return (

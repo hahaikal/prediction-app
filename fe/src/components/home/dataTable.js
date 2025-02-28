@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import getData from "@/handler/getMatchData";
-import { MyDialog, Filter } from '@/app/home/componets';
+import MyDialog from '@/components/home/componets';
+import Bar from '@/components/home/bar'
 
 import {
     Table,
@@ -78,7 +79,7 @@ export default function DataTable() {
 
     return (
         <div className="basis-4/6 text-center ">
-            <Filter
+            <Bar
                 filterDate={filterDate}
                 handleFilterDate={handleFilterDateChange}
                 filterDay={filterDay}
