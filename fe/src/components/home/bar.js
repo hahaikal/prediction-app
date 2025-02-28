@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { addMatch } from "@/handler/addMatch";
+import { toast } from "sonner"
 
 import {
     Dialog,
@@ -13,8 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
     SelectContent,
@@ -22,7 +26,6 @@ import {
     SelectItem,
     SelectTrigger
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import {
     Popover,
     PopoverContent,
@@ -36,29 +39,41 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { ScrollArea } from "@/components/ui/scroll-area"
+
+
 
 const schema = z.object({
+    userId: z.number(),
     league: z.string().nonempty("League is required"),
     date: z.string().nonempty("Date is required"),
     home: z.string().nonempty("Home Team is required"),
     away: z.string().nonempty("Away Team is required"),
-    handicapHome: z.number().min(0, "Handicap is required"),
-    handicapAway: z.number().min(0, "Handicap is required"),
-    oddHome1: z.number(),
-    oddAway1: z.number(),
-    oddHome2: z.number(),
-    oddAway2: z.number(),
-    scoreHome: z.number().int(),
-    scoreAway: z.number().int(),
-    totalVotesHome: z.number().int(),
-    totalVotesDraw: z.number().int(),
-    totalVotesAway: z.number().int()
+    handicapHome: z.string(),
+    handicapAway: z.string(),
+    oddHome1: z.string(),
+    oddAway1: z.string(),
+    oddHome2: z.string(),
+    oddAway2: z.string(),
+    scoreHome: z.string(),
+    scoreAway: z.string(),
+    totalVotesHome: z.string(),
+    totalVotesDraw: z.string(),
+    totalVotesAway: z.string(),
+    totalVotes: z.string(),
+    winnerByOdd: z.string(),
+    note: z.string()
 });
 
-const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
+const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league, onMatchAdded }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [query, setQuery] = useState('');
+
+    const filteredLeagues = query === ''
+        ? league
+        : league.filter((l) =>
+            l.toLowerCase().includes(query.toLowerCase())
+    );
 
     const handleDateSelect = (date) => {
         handleFilterDate(date);
@@ -81,28 +96,72 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
     const form = useForm({
         resolver: zodResolver(schema),
         defaultValues: {
+            userId: 2,
             league: '',
             date: '',
             home: '',
             away: '',
-            handicapHome: 0,
-            handicapAway: 0,
-            oddHome1: 0,
-            oddAway1: 0,
-            oddHome2: 0,
-            oddAway2: 0,
-            scoreHome: 0,
-            scoreAway: 0,
-            totalVotesHome: 0,
-            totalVotesDraw: 0,
-            totalVotesAway: 0
+            handicapHome: '',
+            handicapAway: '',
+            oddHome1: '',
+            oddAway1: '',
+            oddHome2: '',
+            oddAway2: '',
+            scoreHome: '',
+            scoreAway: '',
+            totalVotesHome: '',
+            totalVotesDraw: '',
+            totalVotesAway: '',
+            totalVotes: '',
+            winnerByOdd: '',
+            note: 'Data based on 20 minutes before the match starts'
         }
     });
 
     const onSubmit = async (data) => {
+        const convertedData = {
+            ...data,
+            handicapHome: parseFloat(data.handicapHome),
+            handicapAway: parseFloat(data.handicapAway),
+            oddHome1: parseFloat(data.oddHome1),
+            oddAway1: parseFloat(data.oddAway1),
+            oddHome2: parseFloat(data.oddHome2),
+            oddAway2: parseFloat(data.oddAway2),
+            totalVotesHome: parseInt(data.totalVotesHome, 10),
+            totalVotesDraw: parseInt(data.totalVotesDraw, 10),
+            totalVotesAway: parseInt(data.totalVotesAway, 10),
+            totalVotes: parseInt(data.totalVotes,10),
+            scoreHome: parseInt(data.scoreHome, 10),
+            scoreAway: parseInt(data.scoreAway, 10)
+        };
+        const totalVotes = convertedData.totalVotes;
+
+        const totalVotesHomePercentage = parseFloat(data.totalVotesHome) / 100;
+        const totalVotesDrawPercentage = parseFloat(data.totalVotesDraw) / 100;
+        const totalVotesAwayPercentage = parseFloat(data.totalVotesAway) / 100;
+
+        convertedData.totalVotesHome = Math.round(totalVotes * totalVotesHomePercentage);
+        convertedData.totalVotesDraw = Math.round(totalVotes * totalVotesDrawPercentage);
+        convertedData.totalVotesAway = Math.round(totalVotes * totalVotesAwayPercentage);
+        
+        const scoreHome = convertedData.scoreHome + convertedData.handicapHome;
+        const scoreAway = convertedData.scoreAway + convertedData.handicapAway;
+        const winnerByOdd = (scoreHome - convertedData.scoreAway) > (scoreAway - convertedData.scoreHome)
+            ? 'Home'
+            : (scoreHome - convertedData.scoreAway) < (scoreAway - convertedData.scoreHome)
+            ? 'Away'
+            : 'Draw';
+
+        convertedData.winnerByOdd = winnerByOdd;
+        delete convertedData.totalVotes;
+        
         try {
-            await addMatch(data);
+            await addMatch(convertedData);
             closeAddMatchDialog();
+            onMatchAdded();
+            toast("Match has been added", {
+                description: data.date
+              })
         } catch (error) {
             console.error('Failed to add match:', error);
         }
@@ -153,13 +212,12 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                 Add Match
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px]" aria-describedby="dialog-description">
                     <ScrollArea className="h-[500px] sm:max-w-[500px] rounded-md border p-1" >
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className='p-6'>
                             <DialogHeader>
                                 <DialogTitle className="mb-4">Add Match</DialogTitle>
-                                <Label className="col-span-2"></Label>
                                     <FormField name="league" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>League</FormLabel>
@@ -180,13 +238,13 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     )} />
                             </DialogHeader>
                             <div className="grid gap-x-4 gap-y-2 grid-cols-7 my-6 text-center justify-center items-center">
-                                <div className='col-span-2'></div>
+                                <div className='col-span-2 invisible'></div>
                                 <div className='col-span-2'>
                                     <FormField name="home" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Home Team</FormLabel>
                                             <FormControl>
-                                                <Input {...field} className="col-span-2" placeholder="Home Team"/>
+                                                <Input {...field} placeholder="Home Team"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -198,7 +256,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                         <FormItem>
                                             <FormLabel>Away Team</FormLabel>
                                             <FormControl>
-                                                <Input {...field}  placeholder="Away Team"/>
+                                                <Input {...field} placeholder="Away Team"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -209,7 +267,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="handicapHome" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number" step="0.01"/>
+                                                <Input {...field} step="0.01"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -219,7 +277,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="handicapAway" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number" step="0.01"/>
+                                                <Input {...field} step="0.01"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -230,7 +288,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="oddHome1" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number" step="0.01"/>
+                                                <Input {...field} step="0.01"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -240,7 +298,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="oddAway1" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number" step="0.01"/>
+                                                <Input {...field} step="0.01"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -251,7 +309,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="oddHome2" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number" step="0.01"/>
+                                                <Input {...field} step="0.01"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -261,7 +319,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="oddAway2" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number" step="0.01"/>
+                                                <Input {...field} step="0.01"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -272,7 +330,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="scoreHome" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number"/>
+                                                <Input {...field}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -282,7 +340,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="scoreAway" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number"/>
+                                                <Input {...field}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -293,7 +351,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="totalVotesHome" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number"/>
+                                                <Input {...field}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -303,7 +361,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="totalVotesDraw" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number"/>
+                                                <Input {...field}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -313,7 +371,18 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay }) => {
                                     <FormField name="totalVotesAway" control={form.control} render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input {...field} type="number"/>
+                                                <Input {...field}/>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                                <Label className="col-span-2">Total Votes</Label>
+                                <div className='col-span-5'>
+                                    <FormField name="totalVotes" control={form.control} render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Input {...field}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

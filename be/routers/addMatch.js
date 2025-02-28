@@ -19,6 +19,8 @@ router.post('/', async (req, res) => {
         totalVotesHome,
         totalVotesDraw,
         totalVotesAway,
+        scoreHome,
+        scoreAway,
         winnerByOdd,
         note
     } = req.body;
@@ -44,6 +46,8 @@ router.post('/', async (req, res) => {
         totalVotesHome,
         totalVotesDraw,
         totalVotesAway,
+        scoreHome,
+        scoreAway,
         winnerByOdd,
         note
         });

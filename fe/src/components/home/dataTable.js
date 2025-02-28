@@ -18,7 +18,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 
 export default function DataTable() {
     const [matchData, setMatchData] = useState(null);
@@ -27,15 +26,16 @@ export default function DataTable() {
     const [filterDate, setFilterDate] = useState('');
     const [filterDay, setFilterDay] = useState('');
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const data = await getData();
-                setMatchData(data);
-            } catch (error) {
-                console.error('Error fetching match data:', error);
-            }
+    const fetchData = async () => {
+        try {
+            const data = await getData();
+            setMatchData(data);
+        } catch (error) {
+            console.error('Error fetching match data:', error);
         }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -46,6 +46,7 @@ export default function DataTable() {
         acc[match.league].push(match);
         return acc;
     }, {}) : {};
+    const sortedLeagues = Object.keys(groupedData).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
     const handleRowClick = (match) => {
         setSelectedMatch(match);
@@ -84,10 +85,12 @@ export default function DataTable() {
                 handleFilterDate={handleFilterDateChange}
                 filterDay={filterDay}
                 handleFilterDay={handleFilterDayChange}
+                onMatchAdded={fetchData}
+                league={sortedLeagues}
             />
             {matchData ? (
                 <Accordion type="single" collapsible className="w-full">
-                    {Object.keys(groupedData).map((league, index) => {
+                    {sortedLeagues.map((league, index) => {
                         const filteredMatches = filterMatches(groupedData[league]);
                         if (filteredMatches.length === 0) {
                             return null;
@@ -115,13 +118,7 @@ export default function DataTable() {
                                                     <TableCell>{match.scoreHome}</TableCell>
                                                     <TableCell>{match.scoreAway}</TableCell>
                                                     <TableCell>{match.date}</TableCell>
-                                                    <TableCell>
-                                                        {match.winnerByOdd ? (
-                                                            match.winnerByOdd
-                                                        ) : (
-                                                            <Button>Edit</Button>
-                                                        )}
-                                                    </TableCell>
+                                                    <TableCell>{match.winnerByOdd}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
