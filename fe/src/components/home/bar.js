@@ -159,9 +159,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
             await addMatch(convertedData);
             closeAddMatchDialog();
             onMatchAdded();
-            toast("Match has been added", {
-                description: data.date
-              })
+            toast("Match has been added.")
         } catch (error) {
             console.error('Failed to add match:', error);
         }

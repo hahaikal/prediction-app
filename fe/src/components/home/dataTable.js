@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import getData from "@/handler/getMatchData";
-import MyDialog from '@/components/home/componets';
+import MyDialog from '@/components/home/dialogMatch';
 import Bar from '@/components/home/bar'
+import Chart from '@/components/chart/componentChart';
 
 import {
     Table,
@@ -79,61 +80,64 @@ export default function DataTable() {
     };
 
     return (
-        <div className="basis-4/6 text-center ">
-            <Bar
-                filterDate={filterDate}
-                handleFilterDate={handleFilterDateChange}
-                filterDay={filterDay}
-                handleFilterDay={handleFilterDayChange}
-                onMatchAdded={fetchData}
-                league={sortedLeagues}
-            />
-            {matchData ? (
-                <Accordion type="single" collapsible className="w-full">
-                    {sortedLeagues.map((league, index) => {
-                        const filteredMatches = filterMatches(groupedData[league]);
-                        if (filteredMatches.length === 0) {
-                            return null;
-                        }
-                        return (
-                            <AccordionItem key={index} value={`item-${index}`}>
-                                <AccordionTrigger>{league}</AccordionTrigger>
-                                <AccordionContent>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="bg-gray-200">
-                                                <TableHead className="text-center">Home</TableHead>
-                                                <TableHead className="text-center">Away</TableHead>
-                                                <TableHead className="text-center">Score Home</TableHead>
-                                                <TableHead className="text-center">Score Away</TableHead>
-                                                <TableHead className="text-center">Date</TableHead>
-                                                <TableHead className="text-center">Winner</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredMatches.map((match, matchIndex) => (
-                                                <TableRow key={matchIndex} onClick={() => handleRowClick(match)}>
-                                                    <TableCell>{match.home}</TableCell>
-                                                    <TableCell>{match.away}</TableCell>
-                                                    <TableCell>{match.scoreHome}</TableCell>
-                                                    <TableCell>{match.scoreAway}</TableCell>
-                                                    <TableCell>{match.date}</TableCell>
-                                                    <TableCell>{match.winnerByOdd}</TableCell>
+        <div className="flex flex-row justify-center mt-20 p-10 gap-10">
+            <div className="basis-4/6 text-center ">
+                <Bar
+                    handleFilterDate={handleFilterDateChange}
+                    filterDay={filterDay}
+                    handleFilterDay={handleFilterDayChange}
+                    onMatchAdded={fetchData}
+                    league={sortedLeagues}
+                />
+                {matchData ? (
+                    <Accordion type="single" collapsible className="w-full">
+                        {sortedLeagues.map((league, index) => {
+                            const filteredMatches = filterMatches(groupedData[league]);
+                            if (filteredMatches.length === 0) {
+                                return null;
+                            }
+                            return (
+                                <AccordionItem key={index} value={`item-${index}`}>
+                                    <AccordionTrigger>{league}</AccordionTrigger>
+                                    <AccordionContent>
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-gray-200">
+                                                    <TableHead className="text-center">Home</TableHead>
+                                                    <TableHead className="text-center">Away</TableHead>
+                                                    <TableHead className="text-center">Score Home</TableHead>
+                                                    <TableHead className="text-center">Score Away</TableHead>
+                                                    <TableHead className="text-center">Date</TableHead>
+                                                    <TableHead className="text-center">Winner</TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </AccordionContent>
-                            </AccordionItem>
-                        );
-                    })}
-                </Accordion>
-            ) : (
-                <p>Loading...</p>
-            )}
-            {isDialogOpen && selectedMatch && (
-                <MyDialog match={selectedMatch} onClose={handleCloseDialog} />
-            )}
+                                            </TableHeader>
+                                            <TableBody>
+                                                {filteredMatches.map((match, matchIndex) => (
+                                                    <TableRow key={matchIndex} onClick={() => handleRowClick(match)}>
+                                                        <TableCell>{match.home}</TableCell>
+                                                        <TableCell>{match.away}</TableCell>
+                                                        <TableCell>{match.scoreHome}</TableCell>
+                                                        <TableCell>{match.scoreAway}</TableCell>
+                                                        <TableCell>{match.date}</TableCell>
+                                                        <TableCell>{match.winnerByOdd}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            );
+                        })}
+                    </Accordion>
+                ) : (
+                    <p>Loading...</p>
+                )}
+                {isDialogOpen && selectedMatch && (
+                    <MyDialog match={selectedMatch} onClose={handleCloseDialog} />
+                )}
+            </div>
+            <div className="basis-2/6">
+                <Chart filterDate={filterDate} filterDay={filterDay} />
+            </div>
         </div>
-    );
-}
+)}
