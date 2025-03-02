@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import getData from "@/handler/getMatchData";
 import MyDialog from '@/components/home/dialogMatch';
-import Bar from '@/components/home/bar'
+import Bar from '@/components/home/bar';
 import Chart from '@/components/chart/componentChart';
 
 import {
@@ -24,21 +24,21 @@ export default function DataTable() {
     const [matchData, setMatchData] = useState(null);
     const [selectedMatch, setSelectedMatch] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [filterDate, setFilterDate] = useState('');
-    const [filterDay, setFilterDay] = useState('');
+    const [filters, setFilters] = useState({ date: '', day: '' });
+    const [filteredMatchData, setFilteredMatchData] = useState([]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const data = await getData();
             setMatchData(data);
         } catch (error) {
             console.error('Error fetching match data:', error);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     const groupedData = matchData ? matchData.reduce((acc, match) => {
         if (!acc[match.league]) {
@@ -47,6 +47,7 @@ export default function DataTable() {
         acc[match.league].push(match);
         return acc;
     }, {}) : {};
+    
     const sortedLeagues = Object.keys(groupedData).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
     const handleRowClick = (match) => {
@@ -59,33 +60,37 @@ export default function DataTable() {
         setSelectedMatch(null);
     };
 
-    const handleFilterDateChange = (date) => {
-        setFilterDate(date);
+    const handleFilterChange = (type, value) => {
+        setFilters(prev => ({ ...prev, [type]: value }));
     };
 
-    const handleFilterDayChange = (value) => {
-        setFilterDay(value);
-    };
-
-    const filterMatches = (matches) => {
+    const filterMatches = useCallback((matches) => {
+        if (!Array.isArray(matches)) return [];
         return matches.filter(match => {
             const matchDate = new Date(match.date);
             const matchDay = matchDate.toLocaleString('en-US', { weekday: 'long' });
 
-            const dateMatch = filterDate ? matchDate.toDateString() === filterDate.toDateString() : true;
-            const dayMatch = filterDay ? matchDay === filterDay : true;
+            const dateMatch = filters.date ? matchDate.toDateString() === new Date(filters.date).toDateString() : true;
+            const dayMatch = filters.day ? matchDay === filters.day : true;
 
             return dateMatch && dayMatch;
         });
-    };
+    }, [filters]);
+
+    useEffect(() => {
+        if (matchData) {
+            const filteredData = filterMatches(matchData);
+            setFilteredMatchData(filteredData);
+        }
+    }, [filters, matchData, filterMatches]);
 
     return (
         <div className="flex flex-row justify-center mt-20 p-10 gap-10">
             <div className="basis-4/6 text-center ">
                 <Bar
-                    handleFilterDate={handleFilterDateChange}
-                    filterDay={filterDay}
-                    handleFilterDay={handleFilterDayChange}
+                    handleFilterDate={(date) => handleFilterChange('date', date)}
+                    filterDay={filters.day}
+                    handleFilterDay={(value) => handleFilterChange('day', value)}
                     onMatchAdded={fetchData}
                     league={sortedLeagues}
                 />
@@ -137,7 +142,17 @@ export default function DataTable() {
                 )}
             </div>
             <div className="basis-2/6">
-                <Chart filterDate={filterDate} filterDay={filterDay} />
+                {filteredMatchData && filteredMatchData.length > 0 ? (
+                    <Chart filterDate={filters.date} filterDay={filters.day} data={filteredMatchData} type={'handicap'} />
+                ) : (
+                    <p>No matches found for the selected filters.</p>
+                )}
+                {filteredMatchData && filteredMatchData.length > 0 ? (
+                    <Chart filterDate={filters.date} filterDay={filters.day} data={filteredMatchData} type={'handicapped'}/>
+                ) : (
+                    <p>No matches found for the selected filters.</p>
+                )}
             </div>
         </div>
-)}
+    );
+}
