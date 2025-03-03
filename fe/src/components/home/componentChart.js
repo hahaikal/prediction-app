@@ -9,9 +9,9 @@ import {
   calculateWinPercentage, 
   calculateDrawPercentage, 
   calculateLosePercentage,
-  calculateWinHandicapped,
-  calculateDrawHandicapped,
-  calculateLoseHandicapped 
+  homeDPercentage,
+  awayDPercentage,
+  drawDPercentage
 } from "@/handler/percentage/percentage";
 
 import {
@@ -23,7 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -34,8 +33,7 @@ export default function ComponentPieChart({ filterDate, filterDay, data, type })
   const firstMatch = data[0].date;
   const lastMatch = data[data.length - 1].date;
   const formattedFilterDate = filterDate ? new Date(filterDate).toISOString().slice(0, 10) : '';
-  console.log(formattedFilterDate, filterDay);
-
+  
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
@@ -52,34 +50,57 @@ export default function ComponentPieChart({ filterDate, filterDay, data, type })
     };
   }, [data]);
 
-  const chartConfig = {
-    visitors: {
-      label: "Percentage",
-    },
-    home: {
-      label: "Home",
-      color: "blue",
-    },
-    away: {
-      label: "Away",
-      color: "red",
-    },
-    draw: {
-      label: "Draw",
-      color: "gray",
-    },
-    lose: {
-      label: "Lose",
-      color: "red",
+  const chartConfig = useMemo(() => {
+    if (type == 'handicap') {
+      return {
+        visitors: {
+          label: "Percentage",
+        },
+        home: {
+          label: "Home",
+          color: "blue",
+        },
+        away: {
+          label: "Away",
+          color: "red",
+        },
+        draw: {
+          label: "Draw",
+          color: "gray",
+        },
+        lose: {
+          label: "Lose",
+          color: "red",
+        }
+      };
+    } else if (type == 'D') {
+      return {
+        visitors: {
+          label: "Percentage",
+        },
+        home: {
+          label: "Home",
+          color: "blue",
+        },
+        away: {
+          label: "Away",
+          color: "red",
+        },
+        draw: {
+          label: "Draw",
+          color: "gray",
+        }
+      };
     }
-  };
+  }, [type]);
+
+  const homeDPercentageValue = useMemo(() => homeDPercentage(dataHandicap), [dataHandicap]);
+  const awayDPercentageValue = useMemo(() => awayDPercentage(dataHandicap), [dataHandicap]);
+  const drawDPercentageValue = useMemo(() => drawDPercentage(dataHandicap), [dataHandicap]);
 
   const winPercentage = useMemo(() => calculateWinPercentage(dataHandicap), [dataHandicap]);
   const drawPercentage = useMemo(() => calculateDrawPercentage(dataHandicap), [dataHandicap]);
   const losePercentage = useMemo(() => calculateLosePercentage(dataHandicap), [dataHandicap]);
-  const homeHandicapped = useMemo(() => calculateWinHandicapped(dataHandicap), [dataHandicap]);
-  const awayHandicapped = useMemo(() => calculateDrawHandicapped(dataHandicap), [dataHandicap]);
-  const loseHandicapped = useMemo(() => calculateLoseHandicapped(dataHandicap), [dataHandicap]);
 
   const chartData = useMemo(() => {
     if (!dataHandicap) return [];
@@ -88,14 +109,13 @@ export default function ComponentPieChart({ filterDate, filterDay, data, type })
         { winner: "Home", total: dataHandicap.homeHandicap, fill: "blue" },
         { winner: "Away", total: dataHandicap.awayHandicap, fill: "yellow" },
         { winner: "Draw", total: dataHandicap.drawHandicap, fill: "gray" },
-        { winner: "Lose", total: dataHandicap.loseHandicap, fill: "red" },
+        { winner: "Lose", total: dataHandicap.loseHandicap, fill: "red" }
       ];
-    } else if (type == 'handicapped') {
+    } else if (type == 'D') {
       return [
-        { winner: "Home", total: dataHandicap.homeHandicapped, fill: "blue" },
-        { winner: "Away", total: dataHandicap.awayHandicapped, fill: "yellow" },
-        { winner: "Draw", total: dataHandicap.drawHandicapped, fill: "gray" },
-        { winner: "Lose", total: dataHandicap.loseHandicapped, fill: "red" },
+        { winner: "Home", total: dataHandicap.homeD, fill: "blue" },
+        { winner: "Away", total: dataHandicap.awayD, fill: "yellow" },
+        { winner: "Draw", total: dataHandicap.drawD, fill: "gray" }
       ];
     }
   }, [dataHandicap, type]);
@@ -107,8 +127,8 @@ export default function ComponentPieChart({ filterDate, filterDay, data, type })
   return (
     <Card className="flex flex-col shadow-none border-none">
       <CardHeader className="items-center pb-0">
-        <CardTitle>{type == 'handicap' ? 'Win by Handicapping' : 'Win by Handicapped'}</CardTitle>
-        <CardDescription>{type == 'handicapped' ? '' : formattedFilterDate ? formattedFilterDate : filterDay ? filterDay : `${firstMatch} s/d ${lastMatch}`}</CardDescription>
+        <CardTitle>{type == 'handicap' ? 'Win by Handicapping' : '0-0 Handicap'}</CardTitle>
+        <CardDescription>{type == 'D' ? '' : (formattedFilterDate ? formattedFilterDate : filterDay ? filterDay : `${firstMatch} s/d ${lastMatch}`)}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -162,15 +182,8 @@ export default function ComponentPieChart({ filterDate, filterDay, data, type })
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          {type == 'handicap' ?
-            `Win : ${winPercentage}% Draw : ${drawPercentage}% Lose : ${losePercentage}%` :
-            `Win : ${homeHandicapped}% Draw : ${awayHandicapped}% Lose : ${loseHandicapped}%`
-          }
-          {
-            type == 'handicap' ? 
-            (winPercentage > losePercentage ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />) :
-            (homeHandicapped > loseHandicapped ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />)
-          }
+          {type == 'handicap' ? (`Win : ${winPercentage}% Draw : ${drawPercentage}% Lose : ${losePercentage}%`) : `Home : ${homeDPercentageValue}% Draw : ${drawDPercentageValue}% Away : ${awayDPercentageValue}%`}
+          {type == 'D' ? '' : (winPercentage > losePercentage ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />)}
         </div>
       </CardFooter>
     </Card>

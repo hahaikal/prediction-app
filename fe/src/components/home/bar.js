@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { format } from "date-fns";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { addMatch } from "@/handler/addMatch";
-import { toast } from "sonner"
+import FormComponent from '../form';
+import { useFormm } from '@/handler/api/useForm';
 
 import {
     Dialog,
@@ -12,9 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
@@ -40,40 +35,9 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 
-
-
-const schema = z.object({
-    userId: z.number(),
-    league: z.string().nonempty("League is required"),
-    date: z.string().nonempty("Date is required"),
-    home: z.string().nonempty("Home Team is required"),
-    away: z.string().nonempty("Away Team is required"),
-    handicapHome: z.string(),
-    handicapAway: z.string(),
-    oddHome1: z.string(),
-    oddAway1: z.string(),
-    oddHome2: z.string(),
-    oddAway2: z.string(),
-    scoreHome: z.string(),
-    scoreAway: z.string(),
-    totalVotesHome: z.string(),
-    totalVotesDraw: z.string(),
-    totalVotesAway: z.string(),
-    totalVotes: z.string(),
-    winnerByOdd: z.string(),
-    note: z.string()
-});
-
 const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league, onMatchAdded }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [query, setQuery] = useState('');
-
-    const filteredLeagues = query === ''
-        ? league
-        : league.filter((l) =>
-            l.toLowerCase().includes(query.toLowerCase())
-    );
 
     const handleDateSelect = (date) => {
         handleFilterDate(date);
@@ -93,30 +57,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
         setIsDialogOpen(false);
     };
 
-    const form = useForm({
-        resolver: zodResolver(schema),
-        defaultValues: {
-            userId: 2,
-            league: '',
-            date: '',
-            home: '',
-            away: '',
-            handicapHome: '',
-            handicapAway: '',
-            oddHome1: '',
-            oddAway1: '',
-            oddHome2: '',
-            oddAway2: '',
-            scoreHome: '',
-            scoreAway: '',
-            totalVotesHome: '',
-            totalVotesDraw: '',
-            totalVotesAway: '',
-            totalVotes: '',
-            winnerByOdd: '',
-            note: 'Data based on 20 minutes before the match starts'
-        }
-    });
+    const form = useFormm();
 
     const onSubmit = async (data) => {
         const convertedData = {
@@ -135,11 +76,11 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
             scoreAway: parseInt(data.scoreAway, 10)
         };
         const totalVotes = convertedData.totalVotes;
-
+    
         const totalVotesHomePercentage = parseFloat(data.totalVotesHome) / 100;
         const totalVotesDrawPercentage = parseFloat(data.totalVotesDraw) / 100;
         const totalVotesAwayPercentage = parseFloat(data.totalVotesAway) / 100;
-
+    
         convertedData.totalVotesHome = Math.round(totalVotes * totalVotesHomePercentage);
         convertedData.totalVotesDraw = Math.round(totalVotes * totalVotesDrawPercentage);
         convertedData.totalVotesAway = Math.round(totalVotes * totalVotesAwayPercentage);
@@ -151,15 +92,14 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
             : (scoreHome - convertedData.scoreAway) < (scoreAway - convertedData.scoreHome)
             ? 'Away'
             : 'Draw';
-
+    
         convertedData.winnerByOdd = winnerByOdd;
         delete convertedData.totalVotes;
-        
+    
         try {
-            await addMatch(convertedData);
+            addMatch(convertedData)
             closeAddMatchDialog();
             onMatchAdded();
-            toast("Match has been added.")
         } catch (error) {
             console.error('Failed to add match:', error);
         }
@@ -235,158 +175,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
                                         </FormItem>
                                     )} />
                             </DialogHeader>
-                            <div className="grid gap-x-4 gap-y-2 grid-cols-7 my-6 text-center justify-center items-center">
-                                <div className='col-span-2 invisible'></div>
-                                <div className='col-span-2'>
-                                    <FormField name="home" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Home Team</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} placeholder="Home Team"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label>Vs</Label>
-                                <div className='col-span-2'>
-                                    <FormField name="away" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Away Team</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} placeholder="Away Team"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label className="col-span-2">Handicap</Label>
-                                <div className='col-span-2'>
-                                    <FormField name="handicapHome" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field} step="0.01"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <div className='col-span-2 col-end-8'> 
-                                    <FormField name="handicapAway" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field} step="0.01"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label className="col-span-2">Odd1</Label>
-                                <div className='col-span-2'>
-                                    <FormField name="oddHome1" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field} step="0.01"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <div className='col-span-2 col-end-8'> 
-                                    <FormField name="oddAway1" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field} step="0.01"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label className="col-span-2">Odd2</Label>
-                                <div className='col-span-2'>
-                                    <FormField name="oddHome2" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field} step="0.01"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <div className='col-span-2 col-end-8'> 
-                                    <FormField name="oddAway2" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field} step="0.01"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label className="col-span-2">Score</Label>
-                                <div className='col-span-2'>
-                                    <FormField name="scoreHome" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <div className='col-span-2 col-end-8'> 
-                                    <FormField name="scoreAway" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label className="col-span-2">Votes</Label>
-                                <div className='col-span-2'>
-                                    <FormField name="totalVotesHome" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <div>
-                                    <FormField name="totalVotesDraw" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <div className='col-span-2 '> 
-                                    <FormField name="totalVotesAway" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <Label className="col-span-2">Total Votes</Label>
-                                <div className='col-span-5'>
-                                    <FormField name="totalVotes" control={form.control} render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input {...field}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                            </div>
+                            <FormComponent dataForm={form} />
                             <Button type="submit" className="mt-4">
                                 Save
                             </Button>

@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 /src/handler/percentage
+/src/handler/api
 .pnp.*
 .yarn/*
 !.yarn/patches
