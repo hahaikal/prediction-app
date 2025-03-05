@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import getData from "@/handler/api/getMatchData";
-import MyDialog from '@/components/home/dialogMatch';
-import Bar from '@/components/home/bar';
-import Chart from '@/components/home/componentChart';
+import MyDialog from "@/components/home/dialogMatch";
+import Bar from "@/components/home/bar";
+import Chart from "@/components/home/componentChart";
 
 import {
     Table,
@@ -88,12 +88,13 @@ export default function DataTable() {
         <div className="flex flex-row justify-center mt-20 p-10 gap-10">
             <div className="basis-4/6 text-center ">
                 <Bar
+                    onMatchAdded={fetchData}
                     handleFilterDate={(date) => handleFilterChange('date', date)}
                     filterDay={filters.day}
                     handleFilterDay={(value) => handleFilterChange('day', value)}
-                    onMatchAdded={fetchData}
                     league={sortedLeagues}
                 />
+
                 {matchData ? (
                     <Accordion type="single" collapsible className="w-full">
                         {sortedLeagues.map((league, index) => {

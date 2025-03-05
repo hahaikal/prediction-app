@@ -1,5 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useFormm } from '@/handler/api/useForm';
 import {
     Form,
     FormControl,
@@ -9,7 +11,41 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 
-export default function FormComponent (form) {
+export const FormHeader = ({ onSubmit }) => {
+
+    const form = useFormm();
+
+    return (
+        <div className="col-span-2 border mt-10 shadow-md">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className='p-6'>
+                    <FormField name="league" control={form.control} render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>League</FormLabel>
+                        <FormControl>
+                            <Input {...field} placeholder="League" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )} />
+                    <FormField name="date" control={form.control} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Date</FormLabel>
+                            <FormControl>
+                                <Input {...field} placeholder="Date" type="date" />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormComponent form={form} />
+                    <Button type="submit" className="mt-4" >Save</Button>
+                </form>
+            </Form>
+        </div>
+    )
+}
+
+export function FormComponent (form) {
     return (
         <div className="grid gap-x-4 gap-y-2 grid-cols-7 my-6 text-center justify-center items-center">
             <div className='col-span-2 invisible'></div>

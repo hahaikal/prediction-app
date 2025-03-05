@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { format } from "date-fns";
-import FormComponent from '../form';
+import { FormComponent, FormHeader } from '../form';
 import { useFormm } from '@/handler/api/useForm';
-
+import { convertData } from '@/handler/percentage/percentage'
+import { CalendarIcon } from "lucide-react";
+import addMatch from '@/handler/api/addMatch';
 import {
     Dialog,
     DialogContent,
@@ -12,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
@@ -38,6 +39,7 @@ import {
 const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league, onMatchAdded }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const form = useFormm();
 
     const handleDateSelect = (date) => {
         handleFilterDate(date);
@@ -57,47 +59,12 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
         setIsDialogOpen(false);
     };
 
-    const form = useFormm();
-
     const onSubmit = async (data) => {
-        const convertedData = {
-            ...data,
-            handicapHome: parseFloat(data.handicapHome),
-            handicapAway: parseFloat(data.handicapAway),
-            oddHome1: parseFloat(data.oddHome1),
-            oddAway1: parseFloat(data.oddAway1),
-            oddHome2: parseFloat(data.oddHome2),
-            oddAway2: parseFloat(data.oddAway2),
-            totalVotesHome: parseInt(data.totalVotesHome, 10),
-            totalVotesDraw: parseInt(data.totalVotesDraw, 10),
-            totalVotesAway: parseInt(data.totalVotesAway, 10),
-            totalVotes: parseInt(data.totalVotes,10),
-            scoreHome: parseInt(data.scoreHome, 10),
-            scoreAway: parseInt(data.scoreAway, 10)
-        };
-        const totalVotes = convertedData.totalVotes;
-    
-        const totalVotesHomePercentage = parseFloat(data.totalVotesHome) / 100;
-        const totalVotesDrawPercentage = parseFloat(data.totalVotesDraw) / 100;
-        const totalVotesAwayPercentage = parseFloat(data.totalVotesAway) / 100;
-    
-        convertedData.totalVotesHome = Math.round(totalVotes * totalVotesHomePercentage);
-        convertedData.totalVotesDraw = Math.round(totalVotes * totalVotesDrawPercentage);
-        convertedData.totalVotesAway = Math.round(totalVotes * totalVotesAwayPercentage);
-        
-        const scoreHome = convertedData.scoreHome + convertedData.handicapHome;
-        const scoreAway = convertedData.scoreAway + convertedData.handicapAway;
-        const winnerByOdd = (scoreHome - convertedData.scoreAway) > (scoreAway - convertedData.scoreHome)
-            ? 'Home'
-            : (scoreHome - convertedData.scoreAway) < (scoreAway - convertedData.scoreHome)
-            ? 'Away'
-            : 'Draw';
-    
-        convertedData.winnerByOdd = winnerByOdd;
-        delete convertedData.totalVotes;
+        const converted = convertData(data)
     
         try {
-            addMatch(convertedData)
+            await addMatch(converted)
+
             closeAddMatchDialog();
             onMatchAdded();
         } catch (error) {
@@ -175,10 +142,8 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
                                         </FormItem>
                                     )} />
                             </DialogHeader>
-                            <FormComponent dataForm={form} />
-                            <Button type="submit" className="mt-4">
-                                Save
-                            </Button>
+                            <FormComponent form={form} />
+                            <Button type="submit" className="mt-4"> Save</Button>
                         </form>
                     </Form>
                     </ScrollArea>
