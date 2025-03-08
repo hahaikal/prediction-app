@@ -1,14 +1,27 @@
 "use client";
 
-import { useFormm } from '@/handler/api/useForm';
-import { convertData } from '@/handler/percentage/percentage'
+import { useEffect, useState } from 'react';
+import { DialogComponent } from '@/components/home/dialogMatch';
+import { convertData } from '@/handler/percentage/percentage';
 import { FormHeader } from '@/components/form'
+import { retrieveFormData } from '@/handler/api/addFormPrediksi'
 
 export default function Prediksi() {
-    const form = useFormm();
+    const [matchData, setMatchData] = useState(null)
+    const [loading, setLoading] = useState(true);
     
-    const onSubmit = (data) => {
-        const converted = convertData(data)
+    useEffect(() => {
+        const fetchData = async () => {
+            const retrievedData = await retrieveFormData();
+            setMatchData(retrievedData);
+            setLoading(false);
+        };
+        fetchData();
+    }, []);
+
+    const onSubmit = async (data) => {
+        const converted = convertData(data);
+        delete converted.userId;
         console.log(converted)
     }
 
@@ -18,7 +31,16 @@ export default function Prediksi() {
             <div className="">
                 
             </div>
-            <FormHeader onSubmit={onSubmit} />
+                {loading ? (
+                    <div>Loading...</div>
+                ) : (
+                    <div className="col-span-2 border mt-10 shadow-md grid grid-row gap-8">
+                        <FormHeader onSubmit={onSubmit} match={matchData[0]}/>
+                        <div className='p-8'>
+                            <DialogComponent match={matchData[0]}/>
+                        </div>
+                    </div>
+                )}
             <div className="">
                 
             </div>

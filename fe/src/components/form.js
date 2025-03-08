@@ -11,19 +11,18 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 
-export const FormHeader = ({ onSubmit }) => {
-
+export const FormHeader = ({ onSubmit, match = {} }) => {
+    console.log(match)
     const form = useFormm();
 
     return (
-        <div className="col-span-2 border mt-10 shadow-md">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='p-6'>
                     <FormField name="league" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormLabel>League</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="League" />
+                            <Input {...field} placeholder="League" value={match.league} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -32,20 +31,19 @@ export const FormHeader = ({ onSubmit }) => {
                         <FormItem>
                             <FormLabel>Date</FormLabel>
                             <FormControl>
-                                <Input {...field} placeholder="Date" type="date" />
+                                <Input {...field} placeholder="Date" type="date" className="w-50" value={match.date} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )} />
-                    <FormComponent form={form} />
-                    <Button type="submit" className="mt-4" >Save</Button>
+                    <FormComponent form={form} match={match} />
+                    <Button type="submit" className="mt-4">Save</Button>
                 </form>
             </Form>
-        </div>
     )
 }
 
-export function FormComponent (form) {
+export function FormComponent({ form, match = {}}) {
     return (
         <div className="grid gap-x-4 gap-y-2 grid-cols-7 my-6 text-center justify-center items-center">
             <div className='col-span-2 invisible'></div>
@@ -54,7 +52,7 @@ export function FormComponent (form) {
                     <FormItem>
                         <FormLabel>Home Team</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="Home Team"/>
+                            <Input {...field} placeholder="Home Team" value={match.home} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -66,7 +64,7 @@ export function FormComponent (form) {
                     <FormItem>
                         <FormLabel>Away Team</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="Away Team"/>
+                            <Input {...field} placeholder="Away Team" value={match.away} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -77,17 +75,17 @@ export function FormComponent (form) {
                 <FormField name="handicapHome" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field} step="0.01"/>
+                            <Input {...field} step="0.01" value={match.handicapHome} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
             </div>
-            <div className='col-span-2 col-end-8'> 
+            <div className='col-span-2 col-end-8'>
                 <FormField name="handicapAway" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field} step="0.01"/>
+                            <Input {...field} step="0.01" value={match.handicapAway} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -98,17 +96,17 @@ export function FormComponent (form) {
                 <FormField name="oddHome1" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field} step="0.01"/>
+                            <Input {...field} step="0.01" value={match.oddHome1} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
             </div>
-            <div className='col-span-2 col-end-8'> 
+            <div className='col-span-2 col-end-8'>
                 <FormField name="oddAway1" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field} step="0.01"/>
+                            <Input {...field} step="0.01" value={match.oddAway1} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -119,17 +117,17 @@ export function FormComponent (form) {
                 <FormField name="oddHome2" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field} step="0.01"/>
+                            <Input {...field} step="0.01" value={match.oddHome2} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
             </div>
-            <div className='col-span-2 col-end-8'> 
+            <div className='col-span-2 col-end-8'>
                 <FormField name="oddAway2" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field} step="0.01"/>
+                            <Input {...field} step="0.01" value={match.oddAway2} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -140,17 +138,17 @@ export function FormComponent (form) {
                 <FormField name="scoreHome" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field}/>
+                            <Input {...field} value={match.scoreHome} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
             </div>
-            <div className='col-span-2 col-end-8'> 
+            <div className='col-span-2 col-end-8'>
                 <FormField name="scoreAway" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field}/>
+                            <Input {...field} value={match.scoreAway} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -161,7 +159,7 @@ export function FormComponent (form) {
                 <FormField name="totalVotesHome" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field}/>
+                            <Input {...field} value={match.totalVotesHome} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -171,33 +169,37 @@ export function FormComponent (form) {
                 <FormField name="totalVotesDraw" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field}/>
+                            <Input {...field} value={match.totalVotesDraw} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
             </div>
-            <div className='col-span-2 '> 
+            <div className='col-span-2 '>
                 <FormField name="totalVotesAway" control={form.control} render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input {...field}/>
+                            <Input {...field} value={match.totalVotesAway} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
             </div>
-            <Label className="col-span-2">Total Votes</Label>
-            <div className='col-span-5'>
-                <FormField name="totalVotes" control={form.control} render={({ field }) => (
-                    <FormItem>
-                        <FormControl>
-                            <Input {...field}/>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-            </div>
+            {match.home ? '' : (
+                <>
+                    <Label className="col-span-2">Total Votes</Label>
+                    <div className='col-span-5'>
+                        <FormField name="totalVotes" control={form.control} render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input {...field} value={match.totalVotes} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </div>
+                </>
+            )}
         </div>
     )
 }

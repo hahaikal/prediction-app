@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { format } from "date-fns";
-import { FormComponent, FormHeader } from '../form';
+import { FormComponent } from '../form';
 import { useFormm } from '@/handler/api/useForm';
 import { convertData } from '@/handler/percentage/percentage'
 import { CalendarIcon } from "lucide-react";
 import addMatch from '@/handler/api/addMatch';
+import { submitFormData } from '@/handler/api/addFormPrediksi'
+
 import {
     Dialog,
     DialogContent,
@@ -61,10 +63,10 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
 
     const onSubmit = async (data) => {
         const converted = convertData(data)
-    
+        
         try {
             await addMatch(converted)
-
+            
             closeAddMatchDialog();
             onMatchAdded();
         } catch (error) {
@@ -143,7 +145,11 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
                                     )} />
                             </DialogHeader>
                             <FormComponent form={form} />
-                            <Button type="submit" className="mt-4"> Save</Button>
+                            <Button type="submit" className="mt-4 mr-4">Save</Button>
+                            <Button type="button" onClick={() => {
+                                const converted = convertData(form.getValues());
+                                submitFormData(converted)
+                            }}> Prediksi</Button>
                         </form>
                     </Form>
                     </ScrollArea>

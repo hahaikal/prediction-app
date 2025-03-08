@@ -9,6 +9,8 @@ const signUpRouter = require('./routers/signUp')
 const signInRouter = require('./routers/signIn')
 const addMatchRouter = require('./routers/addMatch')
 const getMatchRouter = require('./routers/data')
+const deleteMatchRouter = require('./routers/delete')
+const addFormMatch = require('./routers/formDataPrediction')
 
 app.use(cors())
 app.use(express.json())
@@ -25,10 +27,12 @@ app.get('/', (req,res) => {
     })
 })
 
-app.use('/signup', signUpRouter)
-app.use('/signin', signInRouter)
-app.use('/addMatch', addMatchRouter)
-app.use('/getMatch', getMatchRouter)
+app.use('/signup', signUpRouter);
+app.use('/signin', signInRouter);
+app.use('/addMatch', addMatchRouter);
+app.use('/getMatch', getMatchRouter);
+app.use('/match', deleteMatchRouter);
+app.use('/submit', addFormMatch);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

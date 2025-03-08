@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import getData from "@/handler/api/getMatchData";
-import MyDialog from "@/components/home/dialogMatch";
+import { MyDialog } from "@/components/home/dialogMatch";
 import Bar from "@/components/home/bar";
 import Chart from "@/components/home/componentChart";
 

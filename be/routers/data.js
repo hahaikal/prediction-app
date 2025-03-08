@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const DataUser = require('../models/dataUser');
-const User = require('../models/user');
+const DataUser = require('../app/models/dataUser');
+const User = require('../app/models/user');
 
 router.get('/', async (req, res) => {
     try {
