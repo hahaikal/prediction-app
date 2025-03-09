@@ -16,14 +16,14 @@ export const MyDialog = ({ match, onClose }) => {
                     <DialogTitle>{match.league}</DialogTitle>
                     <DialogDescription>{match.date}</DialogDescription>
                 </DialogHeader>
-                <DialogComponent match={match} />
+                <DialogComponent match={match} label={"Votes Distributor"} />
                     <p className="text-center">{match.note}</p>
             </DialogContent>
         </Dialog>
     );
 };
 
-export const DialogComponent = ({ match }) => {
+export const DialogComponent = ({ match, label }) => {
     const totalVotes = match.totalVotesHome + match.totalVotesDraw + match.totalVotesAway;
 
     const homePercentage = ((match.totalVotesHome / totalVotes) * 100).toFixed(2);
@@ -51,7 +51,7 @@ export const DialogComponent = ({ match }) => {
                 <Label className="col-span-2 col-end-8">{match.scoreAway}</Label>
             </div>
             <div className="my-6">
-                <Label className="block text-center mb-3">Votes Distribution</Label>
+                <Label className="block text-center mb-3">{label}</Label>
                 <div className="relative w-full h-2 bg-gray-200 rounded">
                     <div
                     className="absolute top-0 left-0 h-full bg-blue-500 rounded-l"

@@ -35,9 +35,9 @@ export default function Prediksi() {
                     <div>Loading...</div>
                 ) : (
                     <div className="col-span-2 border mt-10 shadow-md grid grid-row gap-8">
-                        <FormHeader onSubmit={onSubmit} match={matchData[0]}/>
+                        <FormHeader onSubmit={onSubmit} match={matchData}/>
                         <div className='p-8'>
-                            <DialogComponent match={matchData[0]}/>
+                            <DialogComponent match={matchData} label={"Win Percentage"}/>
                         </div>
                     </div>
                 )}

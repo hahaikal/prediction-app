@@ -8,8 +8,8 @@ router.post('/', (req, res) => {
     res.status(201).json(response);
 });
 
-router.get('/', (req, res) => {
-    const data = retrieveFormData();
+router.get('/', async (req, res) => {
+    const data = await retrieveFormData();
     res.status(200).json(data);
 });
 
