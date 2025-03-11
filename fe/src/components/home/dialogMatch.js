@@ -9,6 +9,12 @@ import {
 import { Label } from "@/components/ui/label";
 
 export const MyDialog = ({ match, onClose }) => {
+    const totalVotes = match.totalVotesHome + match.totalVotesDraw + match.totalVotesAway;
+
+    const homePercentage = ((match.totalVotesHome / totalVotes) * 100).toFixed(2);
+    const drawPercentage = ((match.totalVotesDraw / totalVotes) * 100).toFixed(2);
+    const awayPercentage = ((match.totalVotesAway / totalVotes) * 100).toFixed(2);
+
     return (
         <Dialog open={!!match} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[500px]">
@@ -16,20 +22,14 @@ export const MyDialog = ({ match, onClose }) => {
                     <DialogTitle>{match.league}</DialogTitle>
                     <DialogDescription>{match.date}</DialogDescription>
                 </DialogHeader>
-                <DialogComponent match={match} label={"Votes Distributor"} />
+                <DialogComponent match={match} label={"Votes Distributor"} homeVotes={homePercentage} drawVotes={drawPercentage} awayVotes={awayPercentage} />
                     <p className="text-center">{match.note}</p>
             </DialogContent>
         </Dialog>
     );
 };
 
-export const DialogComponent = ({ match, label }) => {
-    const totalVotes = match.totalVotesHome + match.totalVotesDraw + match.totalVotesAway;
-
-    const homePercentage = ((match.totalVotesHome / totalVotes) * 100).toFixed(2);
-    const drawPercentage = ((match.totalVotesDraw / totalVotes) * 100).toFixed(2);
-    const awayPercentage = ((match.totalVotesAway / totalVotes) * 100).toFixed(2);
-
+export const DialogComponent = ({ match, label, homeVotes, drawVotes, awayVotes }) => {
     return(
         <>
             <div className="grid gap-x-4 gap-y-8 grid-cols-7 mt-4 text-center">
@@ -46,30 +46,35 @@ export const DialogComponent = ({ match, label }) => {
                 <Label className="col-span-2">Odd2</Label>
                 <Label className="col-span-2">{match.oddHome2}</Label>
                 <Label className="col-span-2 col-end-8">{match.oddAway2}</Label>
-                <Label className="col-span-2">Score</Label>
-                <Label className="col-span-2">{match.scoreHome}</Label>
-                <Label className="col-span-2 col-end-8">{match.scoreAway}</Label>
+                {
+                    label === "Win Percentage" ? '' :
+                    <>
+                        <Label className="col-span-2">Score</Label>
+                        <Label className="col-span-2">{match.scoreHome}</Label>
+                        <Label className="col-span-2 col-end-8">{match.scoreAway}</Label>
+                    </>
+                }
             </div>
             <div className="my-6">
                 <Label className="block text-center mb-3">{label}</Label>
                 <div className="relative w-full h-2 bg-gray-200 rounded">
                     <div
                     className="absolute top-0 left-0 h-full bg-blue-500 rounded-l"
-                    style={{ width: `${homePercentage}%` }}
+                    style={{ width: `${homeVotes}%` }}
                     ></div>
                     <div 
                     className="absolute top-0 left-0 h-full bg-yellow-500"
-                    style={{ width: `${drawPercentage}%`, left: `${homePercentage}%` }}
+                    style={{ width: `${drawVotes}%`, left: `${homeVotes}%` }}
                     ></div>
                     <div
                     className="absolute top-0 left-0 h-full bg-red-500 rounded-r"
-                    style={{ width: `${awayPercentage}%`, left: `${parseFloat(homePercentage) + parseFloat(drawPercentage)}%` }}
+                    style={{ width: `${awayVotes}%`, left: `${parseFloat(homeVotes) + parseFloat(drawVotes)}%` }}
                     ></div>
                 </div>
                 <div className="flex justify-between mt-2">
-                    <Label>Home: {match.totalVotesHome} ({homePercentage}%)</Label>
-                    <Label>Draw: {match.totalVotesDraw} ({drawPercentage}%)</Label>
-                    <Label>Away: {match.totalVotesAway} ({awayPercentage}%)</Label>
+                    <Label>Home: {label == 'Win Percentage' ? '' : match.totalVotesHome} ({homeVotes}%)</Label>
+                    <Label>Draw: {label == 'Win Percentage' ? '' : match.totalVotesDraw} ({drawVotes}%)</Label>
+                    <Label>Away: {label == 'Win Percentage' ? '' : match.totalVotesAway} ({awayVotes}%)</Label>
                 </div>
             </div>
         </>

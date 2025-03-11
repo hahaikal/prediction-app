@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 
 export const FormHeader = ({ onSubmit, match = {} }) => {
-    console.log(match)
     const form = useFormm();
 
     return (

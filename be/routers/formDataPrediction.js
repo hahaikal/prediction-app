@@ -13,10 +13,10 @@ router.get('/', async (req, res) => {
     res.status(200).json(data);
 });
 
-router.delete('/:index', (req, res) => {
+router.delete('/', (req, res) => {
     const index = parseInt(req.params.index, 10);
-    deleteFormData(index);
-    res.status(204).send();
+    const response = deleteFormData(index);
+    res.status(204).send(response);
 
 });
 
