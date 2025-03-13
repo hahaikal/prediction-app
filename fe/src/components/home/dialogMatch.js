@@ -30,6 +30,7 @@ export const MyDialog = ({ match, onClose }) => {
 };
 
 export const DialogComponent = ({ match, label, homeVotes, drawVotes, awayVotes }) => {
+    console.log(match)
     return(
         <>
             <div className="grid gap-x-4 gap-y-8 grid-cols-7 mt-4 text-center">

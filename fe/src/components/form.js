@@ -80,16 +80,7 @@ export function FormComponent({ form, match = {}}) {
                     </FormItem>
                 )} />
             </div>
-            <div className='col-span-2 col-end-8'>
-                <FormField name="handicapAway" control={form.control} render={({ field }) => (
-                    <FormItem>
-                        <FormControl>
-                            <Input {...field} step="0.01" value={match.handicapAway} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-            </div>
+            <div className='col-span-2 col-end-8'></div>
             <Label className="col-span-2">Odd1</Label>
             <div className='col-span-2'>
                 <FormField name="oddHome1" control={form.control} render={({ field }) => (
