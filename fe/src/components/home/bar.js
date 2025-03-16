@@ -5,6 +5,7 @@ import { useFormm } from '@/handler/api/useForm';
 import { convertData } from '@/handler/percentage/percentage'
 import { CalendarIcon } from "lucide-react";
 import addMatch from '@/handler/api/addMatch';
+import { submitFormData } from '@/handler/api/addFormPrediksi'
 
 import {
     Dialog,
@@ -62,6 +63,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
 
     const onSubmit = async (data) => {
         const converted = convertData(data)
+        console.log(converted)
         
         try {
             await addMatch(converted)
@@ -147,7 +149,7 @@ const Bar = ({ filterDate, handleFilterDate, filterDay, handleFilterDay, league,
                             <Button type="submit" className="mt-4 mr-4">Save</Button>
                             <Button type="button" onClick={() => {
                                 const converted = convertData(form.getValues());
-                                // submitFormData(converted)
+                                submitFormData(converted)
                                 console.log(converted)
                             }}> Save As</Button>
                         </form>
